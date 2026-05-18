@@ -36,7 +36,7 @@ export async function handleOAuthCallback(url: string) {
       throw new Error("No OAuth code found");
     }
   
-    return exchangeCodeForToken(code);
+    return exchangeCodeForToken(code); // await ?
 }
 
 async function exchangeCodeForToken(code: string) {
