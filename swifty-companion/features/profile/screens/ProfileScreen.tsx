@@ -1,19 +1,21 @@
 import { View, Text, Pressable } from 'react-native';
 import { useAuth } from '@/hooks/useAuth';
+import { clearAuthTokens } from '@/utils/storageSecureStore';
 
-const handleLogout = (setIsAuhtenticated) => {
+const handleLogout = (setIsAuthenticated) => {
   console.log('logout');
-  setIsAuhtenticated(false);
+  setIsAuthenticated(false);
+  clearAuthTokens();
 }
 
 export default function ProfileScreen() {
-  const { isAuthenticated, setIsAuhtenticated} = useAuth();
+  const { isAuthenticated, setIsAuthenticated} = useAuth();
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>PROFILE SCREEN</Text>
-      <Pressable onPress={() => handleLogout(setIsAuhtenticated)}>
-        <Text style={{ marginTop: 20 }}>Fake login button</Text>
+      <Pressable onPress={() => handleLogout(setIsAuthenticated)}>
+        <Text style={{ marginTop: 20 }}>Fake logout button</Text>
       </Pressable>
     </View>
   );

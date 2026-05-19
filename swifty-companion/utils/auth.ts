@@ -1,13 +1,7 @@
 import * as Crypto from "expo-crypto";
 import * as Random from "expo-random";
 
-export function base64UrlEncode(str: string) {
-    return btoa(str)
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=+$/, "");
-  }
-
+// Fonction utile pour PKCE
 export function generateCodeVerifier(length = 64): string {
   const randomBytes = Random.getRandomBytes(length);
 
@@ -23,6 +17,7 @@ export function generateCodeVerifier(length = 64): string {
   return result;
 }
 
+// Fonction utile pour PKCE
 export async function generateCodeChallenge(verifier: string): Promise<string> {
     const digest = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,

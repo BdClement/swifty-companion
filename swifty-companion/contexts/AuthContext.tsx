@@ -1,5 +1,6 @@
 import React, { createContext, useState } from 'react';
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import { useEffect } from "react";
 import { handleOAuthCallback } from "../features/auth/services/authService";
 import * as SecureStore from "expo-secure-store";
@@ -7,9 +8,12 @@ import {  getAuthTokens, saveAuthTokens } from '@/utils/storageSecureStore';
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  setIsAuhtenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+
+  authTokens: AuthTokens | null;
+  setAuthTokens: React.Dispatch<React.SetStateAction<AuthTokens | null>>;
 };
-// Type dédié au stockage SecureStore
+
 export type AuthTokens = {
     accessToken: string;
     refreshToken: string;
@@ -26,9 +30,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         async function loadSession() {
           const stored = await getAuthTokens();
-      
+            
           if (!stored) return;
-      
+          console.log('Session issue du SecureStore');
+          console.log(`access_token == ${stored.accessToken}`);
+          console.log(`refresh_token == ${stored.refreshToken}`);
+          console.log(`expires_at == ${stored.expiresAt}\n\n`);
           setAuthTokens(stored);
           setIsAuthenticated(true);
         }
@@ -43,6 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         async ({ url }) => {
             try {
                 if (url.startsWith("swiftycompanion://oauth")) {
+
                     const authResponse = await handleOAuthCallback(url);
 
                     if (
@@ -53,7 +61,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       ) {
                         throw new Error("Invalid OAuth response format");
                       }
-
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    router.replace("/profile");
                     const tokens : AuthTokens = {
                         accessToken: authResponse.access_token,
                         refreshToken: authResponse.refresh_token,

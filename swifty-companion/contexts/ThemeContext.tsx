@@ -6,6 +6,7 @@ export const ThemeContext = createContext(lightTheme);
 
 export function ThemeProvider({ children }) {
   const scheme = useColorScheme();
+  console.log(`theme renvoyé par useColorScheme : ${scheme}`);
 
   const theme = scheme === 'dark' ? darkTheme : lightTheme;
 

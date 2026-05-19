@@ -13,13 +13,13 @@ const handleLogin = async () => {
 }
 
 export default function LoginScreen() {
-  const { isAuthenticated, setIsAuhtenticated} = useAuth();
+  const { isAuthenticated, setIsAuthenticated} = useAuth();
   const theme = useTheme();
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
       <Text style={{ color: theme.colors.text }}>LOGIN SCREEN</Text>
-      <Pressable onPress={() => handleLogin}>
+      <Pressable onPress={() => handleLogin()}>
         <Text style={{ marginTop: 20, color: theme.colors.text}}>Fake login button</Text>
       </Pressable>
     </View>

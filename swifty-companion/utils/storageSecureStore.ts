@@ -14,6 +14,7 @@ export async function saveAuthTokens(tokens: AuthTokens) {
 
 // A appeler au logout de l'app +  clear le authTokens du authContext + isAuthenticated
 export async function clearAuthTokens() {
+    console.log('appel a clearAuthTokens')
     await Promise.all([
         SecureStore.deleteItemAsync("access_token"),
         SecureStore.deleteItemAsync("refresh_token"),
