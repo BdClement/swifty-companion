@@ -3,7 +3,7 @@
     "name": "swifty-companion",
     "slug": "swifty-companion",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "swiftycompanion",
     "userInterfaceStyle": "automatic",
@@ -44,7 +44,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

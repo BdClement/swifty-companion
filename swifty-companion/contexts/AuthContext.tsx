@@ -1,10 +1,10 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { handleOAuthCallback } from "../features/auth/services/authService";
 import * as SecureStore from "expo-secure-store";
 import {  getAuthTokens, saveAuthTokens } from '@/utils/storageSecureStore';
+import { setAuthTokensWithManager, subscribeAuthManager } from '@/features/auth/services/authManager';
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -25,6 +25,18 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
+
+    // Abonnement au AuthManager
+    useEffect(() => {
+      // Le manager stocke la fonction comme une variable dans le Set pour etre executée a l'appel de setAuthTokensWithManager
+      const unsubscribe = subscribeAuthManager((tokens: AuthTokens | null) => {
+          setAuthTokens(tokens);
+          setIsAuthenticated(!!tokens);
+      });
+
+      // Quand le composant est détruit, return => execute le return de subscribeAuthManager qui est une fonction. Nécessaire pour éviter les memory leaks
+      return unsubscribe;
+    }, []);
     
     // Recuperation des données depuisSecureStore si nécessaire
     useEffect(() => {
@@ -36,8 +48,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log(`access_token == ${stored.accessToken}`);
           console.log(`refresh_token == ${stored.refreshToken}`);
           console.log(`expires_at == ${stored.expiresAt}\n\n`);
-          setAuthTokens(stored);
-          setIsAuthenticated(true);
+          setAuthTokensWithManager(stored);
+          // setAuthTokens(stored);
+          // setIsAuthenticated(true);
         }
       
         loadSession();
@@ -71,9 +84,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     };
 
                     // Stockage de access_token, refresh_token, expires_at calculé a partir de expires_in (gestion du refresh token)
-                    await saveAuthTokens(tokens);
-                    setIsAuthenticated(true);
-                    setAuthTokens(tokens)
+                    // await saveAuthTokens(tokens);
+                    // setIsAuthenticated(true);
+                    // setAuthTokens(tokens)
+
+                    await setAuthTokensWithManager(tokens);
                 }
                 // Autres callbacks potentiels
             } catch (error) {

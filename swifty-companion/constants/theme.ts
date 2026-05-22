@@ -55,18 +55,69 @@
 // L'idée est de declarer les données globales propres a des thèmes et de les transmettre a tout les composants
 // On peut penser a jouter des éléments comme les typographie, les spacings systems, les style de button etc
 
+const fonts = {
+  thin: "PlaywriteUSModern_100Thin",
+  extraLight: "PlaywriteUSModern_200ExtraLight",
+  light: "PlaywriteUSModern_300Light",
+  regular: "PlaywriteUSModern_400Regular",
+};
+
+type TypoStyle = {
+  fontSize: number;
+  fontWeight: "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
+  fontFamily: string,
+}
+
+type TypographyScale = {
+
+  h1: TypoStyle;
+  h2: TypoStyle;
+  body: TypoStyle;
+  caption: TypoStyle;
+};
+
+const typo: TypographyScale = {
+  h1: { fontSize: 32, fontWeight: "900", fontFamily: fonts.regular },
+  h2: { fontSize: 26, fontWeight: "600", fontFamily: fonts.regular },
+  body: { fontSize: 16, fontWeight: "400", fontFamily: fonts.regular },
+  caption: { fontSize: 12, fontWeight: "400", fontFamily: fonts.regular },
+}
+
+const space = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
+};
+
+const rad = {
+    sm: 6,
+    md: 12,
+    lg: 20,
+    xl: 28,
+    full: 9999,
+}
+
 export const lightTheme = {
   colors: {
-    background: '#ffffff',
-    text: '#111111',
-    primary: '#4f46e5',
+    background: '#EDDFCC',
+    text: '#803711',// TBD
+    primary: '#910909',
   },
+  typography : typo,
+  radius: rad,
+  spacing: space,
 };
 
 export const darkTheme = {
   colors: {
     background: '#000000',
-    text: '#ffffff',
-    primary: '#6366f1',
+    text: '#ffffff',// TBD
+    primary: '#55CC00',
   },
+  typography : typo,
+  radius: rad,
+  spacing: space,
 };

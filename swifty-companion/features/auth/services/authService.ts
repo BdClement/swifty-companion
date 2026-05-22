@@ -1,6 +1,8 @@
 import { normalizeCode } from "@/utils/auth";
 import { env } from "../../../config/env";
 import * as Linking from "expo-linking";
+import { AuthTokens } from "@/contexts/AuthContext";
+import { saveAuthTokens } from "@/utils/storageSecureStore";
 
 console.log('uid == ', env.clientUid);
 
@@ -56,4 +58,42 @@ async function fetchOAuthTokens(code: string) {
     }
 
     return data;
+  }
+
+  // Pour le refreshToken, OAuth attends les credentials dans le header ou en tant que paramètre de requete
+  export async function refreshAccessToken(refreshToken: string) {
+    const credentials = btoa(`${env.clientUid}${env.clientSecret}`)//encode une string en Base64 (normalement : entre les 2)
+    console.log("btoa credentials = ", credentials);
+    const response = await fetch("https://api.intra.42.fr/oauth/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${credentials}`,
+        },
+        body: JSON.stringify({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          // client_id: env.clientUid,
+          // client_secret: env.clientSecret,
+        }),
+        // body: new URLSearchParams({
+        //   grant_type: "refresh_token",
+        //   refresh_token: refreshToken,
+        //   client_id: env.clientUid,
+        //   client_secret: env.clientSecret,
+        // }).toString()
+      });
+      
+      const data = await response.json();
+      console.log("response refresh = ", data);
+      if (!response.ok) {
+        throw new Error(
+          data.error_description ||
+          data.error ||
+          "Refresh failed"
+        );
+      }
+      // return await response.json();
+      return data;
   }

@@ -20,6 +20,8 @@ import React, {
   type ResponsiveContextType = {
     width: number;
     height: number;
+
+    isLandscape: boolean;
   
     isMobile: boolean;
     isTablet: boolean;
@@ -52,6 +54,7 @@ import React, {
   }: Props) => {
     const { width, height } =
       useWindowDimensions();
+    const isLandscape = width > height;
   
     const responsive = useMemo(() => {
       const deviceType = getDeviceType(width);
@@ -59,6 +62,7 @@ import React, {
       return {
         width,
         height,
+        isLandscape,
   
         deviceType,
   
