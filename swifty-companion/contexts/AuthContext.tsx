@@ -64,31 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 if (url.startsWith("swiftycompanion://oauth")) {
 
-                    const authResponse = await handleOAuthCallback(url);
-
-                    if (
-                        !authResponse ||
-                        typeof authResponse.access_token !== "string" ||
-                        typeof authResponse.refresh_token !== "string" ||
-                        typeof authResponse.expires_in !== "number"
-                      ) {
-                        throw new Error("Invalid OAuth response format");
-                      }
+                    // const authResponse = await handleOAuthCallback(url);
+                    await handleOAuthCallback(url);
                     await new Promise(resolve => setTimeout(resolve, 800));
                     router.replace("/profile");
-                    const tokens : AuthTokens = {
-                        accessToken: authResponse.access_token,
-                        refreshToken: authResponse.refresh_token,
-                        expiresAt:
-                            Date.now() + authResponse.expires_in * 1000
-                    };
+                    // Deplacé dans authService
+                    // const tokens : AuthTokens = {
+                    //     accessToken: authResponse.access_token,
+                    //     refreshToken: authResponse.refresh_token,
+                    //     expiresAt:
+                    //         Date.now() + authResponse.expires_in * 1000
+                    // };
 
                     // Stockage de access_token, refresh_token, expires_at calculé a partir de expires_in (gestion du refresh token)
                     // await saveAuthTokens(tokens);
                     // setIsAuthenticated(true);
                     // setAuthTokens(tokens)
 
-                    await setAuthTokensWithManager(tokens);
+                    // await setAuthTokensWithManager(tokens);
                 }
                 // Autres callbacks potentiels
             } catch (error) {

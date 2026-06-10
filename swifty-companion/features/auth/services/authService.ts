@@ -3,6 +3,7 @@ import { env } from "../../../config/env";
 import * as Linking from "expo-linking";
 import { AuthTokens } from "@/contexts/AuthContext";
 import { saveAuthTokens } from "@/utils/storageSecureStore";
+import { setAuthTokensWithManager } from "./authManager";
 
 console.log('uid == ', env.clientUid);
 
@@ -29,7 +30,7 @@ export async function handleOAuthCallback(url: string) {
 }
 
 async function fetchOAuthTokens(code: string) {
-  console.log("appel a exchangeCodeForToken");
+  console.log("appel a fetchOAuthTokens");
 
     const response = await fetch("https://api.intra.42.fr/oauth/token", {
       method: "POST",
@@ -56,12 +57,28 @@ async function fetchOAuthTokens(code: string) {
         "OAuth token exchange failed"
       );
     }
-
+    // Validation de réponse
+    if (
+      !data ||
+      typeof data.access_token !== "string" ||
+      typeof data.refresh_token !== "string" ||
+      typeof data.expires_in !== "number"
+    ) {
+      throw new Error("Invalid OAuth response format");
+    }
+    const tokens : AuthTokens = {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresAt:
+          Date.now() + data.expires_in * 1000
+    };
+    await setAuthTokensWithManager(tokens);
     return data;
   }
 
   // Pour le refreshToken, OAuth attends les credentials dans le header ou en tant que paramètre de requete
   export async function refreshAccessToken(refreshToken: string) {
+    // Appel API
     const credentials = btoa(`${env.clientUid}${env.clientSecret}`)//encode une string en Base64 (normalement : entre les 2)
     console.log("btoa credentials = ", credentials);
     const response = await fetch("https://api.intra.42.fr/oauth/token", {
@@ -94,6 +111,24 @@ async function fetchOAuthTokens(code: string) {
           "Refresh failed"
         );
       }
+      // Validation de réponse
+      if (
+        !data ||
+        typeof data.access_token !== "string" ||
+        typeof data.refresh_token !== "string" ||
+        typeof data.expires_in !== "number"
+      ) {
+        throw new Error("Invalid OAuth response format");
+      }
       // return await response.json();
-      return data;
+      // Persistance des nouveaux credentials
+      const tokensUpdate : AuthTokens = {
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt:
+            Date.now() + data.expires_in * 1000
+      };
+      console.log("Tokens update avec : ", tokensUpdate);
+      await setAuthTokensWithManager(tokensUpdate);
+      return tokensUpdate;
   }

@@ -1,3 +1,5 @@
+import { AuthTokens } from "@/contexts/AuthContext";
+import { setAuthTokensWithManager } from "@/features/auth/services/authManager";
 import { refreshAccessToken } from "@/features/auth/services/authService";
 import { getAuthTokens } from "@/utils/storageSecureStore";
 
@@ -16,14 +18,34 @@ export async function apiFetch<T>(
     endpoint: string,
     options: ApiFetchOptions = {}
   ): Promise<T> {
-    const tokens = await getAuthTokens();
+    let tokens = await getAuthTokens();
     if (!tokens) {
         throw new Error("API error : api call tried without token");
     }
     const isExpired = Date.now() >= tokens.expiresAt;
     console.log('ApiFetch isExpired = ', isExpired);
-    console.log("refresh_token envoyé a refreshAccess : ", tokens.refreshToken);
-    if (isExpired) refreshAccessToken(tokens.refreshToken);
+    if (isExpired) {
+      console.log("refresh_token envoyé a refreshAccess : ", tokens.refreshToken);
+      tokens = await refreshAccessToken(tokens.refreshToken);
+      // const refreshResponse = await refreshAccessToken(tokens.refreshToken);
+      // Deplacé dans authService
+      // if (
+      //   !refreshResponse ||
+      //   typeof refreshResponse.access_token !== "string" ||
+      //   typeof refreshResponse.refresh_token !== "string" ||
+      //   typeof refreshResponse.expires_in !== "number"
+      // ) {
+      //   throw new Error("Invalid OAuth response format");
+      // }
+      // const tokensUpdate : AuthTokens = {
+      //   accessToken: refreshResponse.access_token,
+      //   refreshToken: refreshResponse.refresh_token,
+      //   expiresAt:
+      //       Date.now() + refreshResponse.expires_in * 1000
+      // };
+      // console.log("Tokens update avec : ", tokensUpdate);
+      // await setAuthTokensWithManager(tokensUpdate);
+    }
   
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: options.method || "GET",
