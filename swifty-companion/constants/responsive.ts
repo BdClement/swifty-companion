@@ -8,5 +8,3 @@ export const BREAKPOINTS = {
   
   export const GUIDELINE_BASE_WIDTH = 390;
   export const GUIDELINE_BASE_HEIGHT = 844;
-
-// On sépare les cas en 3 types d'ecrans : petit, moyen et grand écran

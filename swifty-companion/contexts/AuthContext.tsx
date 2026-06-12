@@ -5,26 +5,14 @@ import { handleOAuthCallback } from "../features/auth/services/authService";
 import * as SecureStore from "expo-secure-store";
 import {  getAuthTokens, saveAuthTokens } from '@/utils/storageSecureStore';
 import { setAuthTokensWithManager, subscribeAuthManager } from '@/features/auth/services/authManager';
-
-type AuthContextType = {
-  isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
-
-  authTokens: AuthTokens | null;
-  setAuthTokens: React.Dispatch<React.SetStateAction<AuthTokens | null>>;
-};
-
-export type AuthTokens = {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
-  };
+import { AppError, AuthContextType, AuthTokens } from '@/features/auth/types/type';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [authTokens, setAuthTokens] = useState<AuthTokens | null>(null);
+    const [authError, setAuthError] = useState<AppError | null>(null);
 
     // Abonnement au AuthManager
     useEffect(() => {
@@ -49,8 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log(`refresh_token == ${stored.refreshToken}`);
           console.log(`expires_at == ${stored.expiresAt}\n\n`);
           setAuthTokensWithManager(stored);
-          // setAuthTokens(stored);
-          // setIsAuthenticated(true);
         }
       
         loadSession();
@@ -64,29 +50,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 if (url.startsWith("swiftycompanion://oauth")) {
 
-                    // const authResponse = await handleOAuthCallback(url);
                     await handleOAuthCallback(url);
                     await new Promise(resolve => setTimeout(resolve, 800));
                     router.replace("/profile");
-                    // Deplacé dans authService
-                    // const tokens : AuthTokens = {
-                    //     accessToken: authResponse.access_token,
-                    //     refreshToken: authResponse.refresh_token,
-                    //     expiresAt:
-                    //         Date.now() + authResponse.expires_in * 1000
-                    // };
-
-                    // Stockage de access_token, refresh_token, expires_at calculé a partir de expires_in (gestion du refresh token)
-                    // await saveAuthTokens(tokens);
-                    // setIsAuthenticated(true);
-                    // setAuthTokens(tokens)
-
-                    // await setAuthTokensWithManager(tokens);
                 }
+                setAuthError(null);
                 // Autres callbacks potentiels
             } catch (error) {
-            console.error("OAuth callback error:", error);
-            // Améliorer gestion d'erreurs
+              router.replace("/login");
+              console.log("OAuth callback error:", error);
+              setAuthError(error as AppError);
             }
         }
         );
@@ -97,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     return (
-      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, authTokens, setAuthTokens}}>
+      <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, authTokens, setAuthTokens, authError}}>
         {children}
       </AuthContext.Provider>
     );

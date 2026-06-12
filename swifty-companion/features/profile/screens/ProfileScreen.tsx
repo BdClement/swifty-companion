@@ -3,62 +3,66 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from "react";
 import { useAuth } from '@/hooks/useAuth';
 import { clearAuthTokens } from '@/utils/storageSecureStore';
-import { CursusUser, exteractUserProjects, extractLastActiveCursus, extractUser, getMe, User } from '../services/data';
+import { exteractUserProjects, extractLastActiveCursus, extractUser, getMe } from '../services/data';
 import { useTheme } from '@/hooks/useTheme';
 import { useResponsive } from '@/hooks/useResponsive';
 import HeaderProfile from '../components/headerProfile';
 import { setAuthTokensWithManager } from '@/features/auth/services/authManager';
 import SectionSkills from '../components/SectionSkills';
+import SectionProjects from '../components/SectionProjects';
+import { getErrorMessage, useApiError } from '../hooks/use-api-error';
+import { AppError } from '@/features/auth/types/type';
+import { CursusUser, ProjectUser, User } from '../types/type';
 
 const handleLogout = () => {
   console.log('logout');
-  // setIsAuthenticated(false);
-  // clearAuthTokens();
   setAuthTokensWithManager(null);
-  // setUser(null);// Fait dans le useEffect ici 
 }
 
 export default function ProfileScreen() {
   const theme = useTheme();
-  const { ms, hs, vs , isLandscape} = useResponsive();
-  const { isAuthenticated, setIsAuthenticated} = useAuth();
+  const { ms, isLandscape} = useResponsive();
+  const { isAuthenticated } = useAuth();
   // A partager avec un context si beaucoup de composants enfant en ont besoin sinon passer via props
   const [user, setUser] = useState<User | null>(null)// Utilisation d'un useState pour rerender au changement 
   const [lastActiveCursus, setlastActiveCursus] = useState<CursusUser | null>(null)
+  const [userProjects, setUserProjects] = useState<ProjectUser[] | null>(null);
+  const {apiError, setApiError} = useApiError();
 
   // Charger toutes les datas des appels API ici et dispatch aux composants
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setUser(null);
-      setlastActiveCursus(null);
-      // setUserProjects(null);
-      return;
-    };
-  
-    const loadUser = async () => {
-      // Ici getMe plutot
+  const loadUser = async () => {
+    try {
+      setApiError(null);
       const me = await getMe();
-      // console.log("reponse de getMe via apiFetch = ", me);
-      // PUIS function getUser a partir de Me
+
       const user = extractUser(me);
       console.log("user = ", user);
       setUser(user);
 
-      // function getLastActiveCursus a aprtir de Me
       const lastActiveCursus = extractLastActiveCursus(me);
       console.log("lastActiveCursus skills = ", lastActiveCursus?.skills);
       setlastActiveCursus(lastActiveCursus);
       
       if (lastActiveCursus) {
-        // console.log("lastActiveCursus.id === ", lastActiveCursus.cursus_id);
         const userProjects = exteractUserProjects(me, lastActiveCursus.cursus_id)
-        // for (const p of userProjects) {
-        //   console.log(p);
-        // }
-        // setUserProjects(userProjects);
+        for (const p of userProjects) {
+          console.log(p);
+        }
+        setUserProjects(userProjects);
       }
+    } catch (error) {
+      setApiError(error as AppError);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUser(null);
+      setlastActiveCursus(null);
+      setUserProjects(null);
+      setApiError(null);
+      return;
     };
-  
     loadUser();
   }, [isAuthenticated]);
 
@@ -73,50 +77,85 @@ export default function ProfileScreen() {
     },
     logoutSection: {
       flex: 1,
-      // borderWidth: ms(2),
-      // borderColor: "white",
       paddingBottom: isLandscape? ms(8) : ms(12),
-      // justifyContent: "center",
-      // alignContent: "center",
       alignItems: "flex-end"
     },
     logoutButton: {
       paddingHorizontal: ms(theme.spacing.lg),
-      paddingVertical: ms(theme.spacing.sm),
+      paddingVertical: isLandscape? ms(4) : ms(theme.spacing.sm),
       borderWidth: isLandscape? ms(1) : ms(2),
-      // borderColor: "black",
+      borderColor: "black",
       backgroundColor: theme.colors.primary,
       borderRadius: ms(6)
     },
     logoutButtonText: {
       color: theme.colors.background,
       fontSize: isLandscape? ms(10) : ms(14),
-      fontWeight: "bold"
+      fontWeight: "bold",
+      fontFamily: theme.typography.body.fontFamily,
+    },
+    errorContainer: {
+      padding: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 40,
+      borderWidth: isLandscape? ms(1) : ms(2),
+      borderColor: "black",
+    },
+    
+    errorTitle: {
+      fontSize: ms(18),
+      fontWeight: "bold",
+      marginBottom: ms(10),
+    },
+    
+    errorMessage: {
+      fontSize: ms(14),
+      textAlign: "center",
+      marginBottom: ms(20),
+    },
+    
+    retryButton: {
+      paddingVertical: ms(10),
+      paddingHorizontal: ms(20),
+      backgroundColor: theme.colors.primary,
+      borderRadius: ms(8),
+    },
+    
+    retryText: {
+      color: "white",
     }
   });
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View style={styles.logoutSection}>
-          <Pressable onPress={() => handleLogout()} style={styles.logoutButton}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </Pressable>
+      <ScrollView style={styles.scrollContainer}>
+
+        {apiError ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorTitle}>Something went wrong</Text>
+            <Text style={styles.errorMessage}>
+              {getErrorMessage(apiError)}
+            </Text>
+
+            <Pressable onPress={loadUser} style={styles.retryButton}>
+              <Text style={styles.retryText}>Retry</Text>
+            </Pressable>
         </View>
-        <HeaderProfile user={user} lastActiveCursus={lastActiveCursus}/>
-        <SectionSkills lastActiveCursus={lastActiveCursus}/>
-        {/* <SectionProjects/> */}
+      ) : (
+        <>
+          <View style={styles.logoutSection}>
+            <Pressable onPress={() => handleLogout()} style={styles.logoutButton}>
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            </Pressable>
+          </View>
+          <HeaderProfile user={user} lastActiveCursus={lastActiveCursus}/>
+          <SectionSkills lastActiveCursus={lastActiveCursus}/>
+          <SectionProjects userProjects={userProjects}/>
+        </>
+        )}
+
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-// HEADER
-  // Display login info => appel a l'api pour avoir mes datas DONE
-  // Display at least 4 details for the user => login , email, mobile(hidden), Piscine , point de correction, level + Profile Picture DONE
-// SECTION
-  // Display user's skills with level and percentage Possible a partir de me/
-// SECTION
-  // Display user's projects (Completed and failed)
-// LOGOUT BUTTON
-  // Allow navigating back

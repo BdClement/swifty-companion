@@ -1,11 +1,10 @@
-import { AuthTokens } from "@/contexts/AuthContext";
-import { setAuthTokensWithManager } from "@/features/auth/services/authManager";
 import { refreshAccessToken } from "@/features/auth/services/authService";
+import { AppError } from "@/features/auth/types/type";
+import { mapHttpError } from "@/features/profile/hooks/use-api-error";
+import { HttpMethod } from "@/features/profile/types/type";
 import { getAuthTokens } from "@/utils/storageSecureStore";
 
 const API_BASE_URL = "https://api.intra.42.fr/v2";
-
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 interface ApiFetchOptions {
   method?: HttpMethod;
@@ -18,51 +17,48 @@ export async function apiFetch<T>(
     endpoint: string,
     options: ApiFetchOptions = {}
   ): Promise<T> {
-    let tokens = await getAuthTokens();
-    if (!tokens) {
-        throw new Error("API error : api call tried without token");
+    try {
+      let tokens = await getAuthTokens();
+      if (!tokens) {
+          throw {
+            type: "OAUTH_TOKENS_MISSING",
+            message: "No auth token found",
+          } satisfies AppError;
+      }
+      const isExpired = Date.now() >= tokens.expiresAt;
+      console.log('ApiFetch isExpired = ', isExpired);
+      if (isExpired) {
+        console.log("refresh_token envoyé a refreshAccess : ", tokens.refreshToken);
+        tokens = await refreshAccessToken(tokens.refreshToken);
+      }
+    
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: options.method || "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(tokens ? { Authorization: `Bearer ${tokens.accessToken}` } : {}),
+          ...options.headers,
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+    
+      if (!res.ok) {
+        const errorText = await res.text();
+
+        const type = mapHttpError(res.status);
+        throw {
+          type: type,
+          message: errorText || res.statusText,
+        } satisfies AppError;
+      }
+    
+      return (await res.json()) as T;
+    } catch (error: any) {
+      if (error?.type) throw error;
+
+      return Promise.reject({
+        type: "NETWORK",
+        message: error?.message || "Network error",
+      } satisfies AppError);
     }
-    const isExpired = Date.now() >= tokens.expiresAt;
-    console.log('ApiFetch isExpired = ', isExpired);
-    if (isExpired) {
-      console.log("refresh_token envoyé a refreshAccess : ", tokens.refreshToken);
-      tokens = await refreshAccessToken(tokens.refreshToken);
-      // const refreshResponse = await refreshAccessToken(tokens.refreshToken);
-      // Deplacé dans authService
-      // if (
-      //   !refreshResponse ||
-      //   typeof refreshResponse.access_token !== "string" ||
-      //   typeof refreshResponse.refresh_token !== "string" ||
-      //   typeof refreshResponse.expires_in !== "number"
-      // ) {
-      //   throw new Error("Invalid OAuth response format");
-      // }
-      // const tokensUpdate : AuthTokens = {
-      //   accessToken: refreshResponse.access_token,
-      //   refreshToken: refreshResponse.refresh_token,
-      //   expiresAt:
-      //       Date.now() + refreshResponse.expires_in * 1000
-      // };
-      // console.log("Tokens update avec : ", tokensUpdate);
-      // await setAuthTokensWithManager(tokensUpdate);
-    }
-  
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: options.method || "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(tokens ? { Authorization: `Bearer ${tokens.accessToken}` } : {}),
-        ...options.headers,
-      },
-      body: options.body ? JSON.stringify(options.body) : undefined,
-    });
-  
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(
-        `API error ${res.status}: ${errorText || res.statusText}`
-      );
-    }
-  
-    return (await res.json()) as T;
   }

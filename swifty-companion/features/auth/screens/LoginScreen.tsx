@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { Text, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -6,22 +6,43 @@ import { initiateLogin } from '../services/authService';
 import { useResponsive } from '@/hooks/useResponsive';
 
 import { Animated } from "react-native";
-import { useEffect, useRef } from "react";
-
-const handleLogin = async () => {
-  console.log('login');
-  try {
-    await initiateLogin();
-  } catch (error) {
-    console.error('Login error: ', error);
-  }
-}
+import { useEffect, useRef, useState } from "react";
+import { getErrorMessage } from '@/features/profile/hooks/use-api-error';
 
 export default function LoginScreen() {
   const theme = useTheme();
   const { ms, hs, vs , isLandscape} = useResponsive();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(30)).current;
+  
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  const { authError } = useAuth();
+
+  const handleLogin = async () => {
+    setLoginError(null);
+    console.log('login');
+    try {
+      await initiateLogin();
+    } catch (error) {
+      setLoginError("Unable to start authentication. Please try again.");
+    }
+  }
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   const styles = StyleSheet.create({
     container: {
@@ -47,7 +68,6 @@ export default function LoginScreen() {
       borderRadius: ms(theme.radius.lg),
     },
     loginButtonPressed: {
-      // opacity: 0.9,
       transform: [{ scale: 0.96 }], // réduit legerement la taille
     },
     textLoginButton: {
@@ -55,23 +75,14 @@ export default function LoginScreen() {
       fontSize: isLandscape? ms(theme.typography.caption.fontSize) : ms(theme.typography.body.fontSize),
       fontWeight: theme.typography.body.fontWeight,
       fontFamily: theme.typography.body.fontFamily,
+    },
+    error: {
+      color: "red",
+      fontSize: isLandscape? ms(theme.typography.caption.fontSize) : ms(theme.typography.body.fontSize),
+      marginTop: ms(30)
     }
+    
   });
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -92,6 +103,16 @@ export default function LoginScreen() {
       ]} onPress={() => handleLogin()}>
         <Text style={styles.textLoginButton}>Login with 42</Text>
       </Pressable>
+      {loginError && (
+        <Text style={styles.error}>
+          {loginError}
+        </Text>
+      )}
+      {authError && (
+        <Text style={styles.error}>
+          {getErrorMessage(authError)}
+        </Text>
+      )}
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
-import { AuthTokens } from "@/contexts/AuthContext";
 import { clearAuthTokens, saveAuthTokens } from "@/utils/storageSecureStore";
+import { AuthTokens } from "../types/type";
 
 let Auth: AuthTokens | null = null;
 const listeners = new Set<(tokens: AuthTokens | null) => void>();

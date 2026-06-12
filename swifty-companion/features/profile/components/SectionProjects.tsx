@@ -1,14 +1,14 @@
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 import { useResponsive } from "@/hooks/useResponsive";
-import SkillBar from './SkillBar';
-import { CursusUser } from "../types/type";
+import ProjectCard from "./ProjectCard";
+import { ProjectUser } from "../types/type";
 
-type SectionSkillsProps = {
-    lastActiveCursus: CursusUser | null;
+type SectionProjectsProps = {
+    userProjects : ProjectUser[] | null;
 }
 
-export default function SectionSkills({lastActiveCursus} : SectionSkillsProps) {
+export default function SectionProjects({userProjects} : SectionProjectsProps) {
     const theme = useTheme();
     const { ms, hs, vs , isLandscape} = useResponsive();
 
@@ -33,11 +33,16 @@ export default function SectionSkills({lastActiveCursus} : SectionSkillsProps) {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.title}>Skills</Text>
+                <Text style={styles.title}>Projects</Text>
             </View>
-            {lastActiveCursus?.skills.map(skill => (
-                <SkillBar key={skill.id} skill={skill}/>
-            ))}
+            <FlatList
+            data={userProjects}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}// Déja un ScrollView parent
+            renderItem={({ item }) => (
+                <ProjectCard project={item}/>
+            )}
+            />
         </View>
-    );
+    )
 }

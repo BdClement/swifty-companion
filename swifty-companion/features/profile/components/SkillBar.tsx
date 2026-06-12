@@ -1,11 +1,8 @@
 import { useTheme } from "@/hooks/useTheme";
-import { Skill } from "../services/data";
 import { useResponsive } from "@/hooks/useResponsive";
 import { StyleSheet, Text, View } from "react-native";
+import { SkillBarProps } from "../types/type";
 
-type SkillBarProps = {
-    skill: Skill
-}
 
 export default function SkillBar({ skill} : SkillBarProps) {
     const theme = useTheme();

@@ -1,20 +1,14 @@
 import { Image, Text, View, StyleSheet } from "react-native";
 import DEFAULT_IMAGE from"../../../assets/images/avatar-default.webp"
-import { CursusUser, User } from "../services/data";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTheme } from "@/hooks/useTheme";
+import { HeaderProfileProps } from "../types/type";
 
-
-type HeaderProfileProps = {
-    user: User | null;
-    lastActiveCursus: CursusUser | null;
-};
 
 export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfileProps) {
     const theme = useTheme();
     const { ms, hs, vs , isLandscape} = useResponsive();
     const source = user?.image === "default" ? DEFAULT_IMAGE : {uri: user?.image}
-    // const source = DEFAULT_IMAGE
     console.log("source Avatar = ", source);
     
     const styles = StyleSheet.create({
@@ -48,6 +42,7 @@ export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfile
         Label: {
             color: theme.colors.primary,
             fontWeight: "bold",
+            fontFamily: theme.typography.body.fontFamily,
             fontSize: isLandscape? ms(10) : ms(14)
         },
         infoContainerData: {

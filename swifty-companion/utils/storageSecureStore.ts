@@ -1,5 +1,5 @@
+import { AuthTokens } from "@/features/auth/types/type";
 import * as SecureStore from "expo-secure-store";
-import { AuthTokens } from "@/contexts/AuthContext";
 
 // SecureStore est conçu pour le mobile,sur web cela ne fonctionne (on pourrait faire un fallback sur localStorage dans ce cas)
 
