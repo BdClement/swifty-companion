@@ -7,7 +7,7 @@ import { SkillBarProps } from "../types/type";
 export default function SkillBar({ skill} : SkillBarProps) {
     const theme = useTheme();
     const { ms, hs, vs , isLandscape} = useResponsive();
-    const percent = Math.min((skill.level / 10) * 100, 100);
+    const percent = Math.min((skill.level / 21) * 100, 100);
 
     const styles = StyleSheet.create({
         container: {
@@ -17,32 +17,44 @@ export default function SkillBar({ skill} : SkillBarProps) {
             marginBottom: isLandscape? ms(0) : ms(0),
         },
         skillHeader: {
-            width: "50%",
+            width: "32%",
         },
         barContainer: {
             flex: 1,
-            height: "100%",
+            height: isLandscape ? ms(12) : ms(16),
             justifyContent: "center",
-            alignItems: "flex-end"
+            backgroundColor: theme.colors.background,
+            borderColor: theme.colors.primary,
+            borderWidth: ms(1),
+            borderRadius: ms(6),
+            overflow: "hidden",
         },
         barFill: {
-            height: "50%",
+            height: "100%",
             backgroundColor: theme.colors.primary,
-            borderTopLeftRadius: ms(6),
-            borderBottomLeftRadius: ms(6),
-            justifyContent: "center",
-            alignItems: "flex-end",
+            borderTopRightRadius: ms(6),
+            borderBottomRightRadius: ms(6),
         },
         name: {
             fontSize: isLandscape? ms(10) : ms(14),
         },
+        stats: {
+            width: "28%",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            marginStart: ms(8),
+        },
         level: {
-            color: theme.colors.background,
+            color: theme.colors.text,
             fontSize: isLandscape? ms(10) : ms(14),
             fontWeight: "bold",
-            marginEnd: isLandscape? ms(10) : ms(6),
-            justifyContent: "flex-start",
-            alignItems: "center",
+        },
+        percent: {
+            color: theme.colors.primary,
+            fontSize: isLandscape? ms(10) : ms(14),
+            fontWeight: "bold",
+            marginStart: ms(6),
         }
     });
     
@@ -53,9 +65,14 @@ export default function SkillBar({ skill} : SkillBarProps) {
             </View>
 
             <View style={styles.barContainer}>
-                <View style={[styles.barFill, { width: `${percent}%` }]}>
-                    <Text style={styles.level}>{skill.level.toFixed(2)}</Text>
-                </View>
+                <View style={[styles.barFill, { width: `${percent}%` }]} />
+            </View>
+
+            <View style={styles.stats}>
+                <Text style={styles.level}>
+                    {isLandscape ? "Level" : ""}{skill.level.toFixed(2)}
+                </Text>
+                <Text style={styles.percent}>{percent.toFixed(0)}%</Text>
             </View>
         </View>
     );

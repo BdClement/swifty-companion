@@ -73,7 +73,7 @@ export function getErrorMessage(error: AppError) {
         return "Error: Invalid server response"
   
       case "UNKNOWN":
-        "Error: Unknown error. Please contact us."
+        return "Error: Unknown error. Please contact us."
   
       default:
         return "Unexpected error occurred";

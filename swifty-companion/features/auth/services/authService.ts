@@ -112,12 +112,10 @@ async function fetchOAuthTokens(code: string) {
         console.log("response refresh = ", data);
 
         if (!response.ok) {
-          const errorText = await response.text();
-
           const type = mapHttpError(response.status);
           throw {
             type: type,
-            message: errorText || response.statusText,
+            message: data.error_description || data.error,
           } satisfies AppError;
         }
         
