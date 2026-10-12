@@ -40,7 +40,13 @@ export function getErrorMessage(error: AppError) {
         return "Network error. Please check your network connection.";
       
       case "OAUTH_NO_CODE":
-        return "Error: Login cancelled or invalid callback. Try again"
+        return "Error: The callback did not contain an authorization code. Try logging in again."
+
+      case "OAUTH_ACCESS_DENIED":
+        return "Login was cancelled: authorization was denied."
+
+      case "OAUTH_PROVIDER_ERROR":
+        return "Authentication failed: the OAuth provider returned an error."
   
       case "OAUTH_TOKENS_MISSING":
         return "Error: No OAuth tokens"

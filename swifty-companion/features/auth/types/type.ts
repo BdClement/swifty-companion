@@ -18,6 +18,8 @@ export type AuthContextType = {
     type:
       | "NETWORK"
       | "OAUTH_NO_CODE"
+      | "OAUTH_ACCESS_DENIED"
+      | "OAUTH_PROVIDER_ERROR"
       | "OAUTH_TOKENS_MISSING"
       | "HTTP_400"
       | "HTTP_401"

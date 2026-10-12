@@ -31,10 +31,7 @@ export async function generateCodeChallenge(verifier: string): Promise<string> {
       .replace(/=+$/, "");
 }
 
-export function normalizeCode(code: string | string[] | undefined): string {
-    if (!code) {
-      throw new Error("Missing OAuth code");
-    }
-  
-    return Array.isArray(code) ? code[0] : code;
+export function normalizeCode(code: string | string[] | undefined): string | undefined {
+    const normalizedCode = Array.isArray(code) ? code[0] : code;
+    return normalizedCode || undefined;
   }

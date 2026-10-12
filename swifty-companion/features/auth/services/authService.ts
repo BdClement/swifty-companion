@@ -20,11 +20,30 @@ export async function initiateLogin() {
 export async function handleOAuthCallback(url: string) {
   console.log("appel a handleOAuthCallback");
     const parsed = Linking.parse(url);
+    const providerError = normalizeCode(parsed.queryParams?.error);
+
+    if (providerError === "access_denied") {
+      throw {
+        type: "OAUTH_ACCESS_DENIED",
+        message: "The user denied the authorization request",
+      } satisfies AppError;
+    }
+
+    if (providerError) {
+      throw {
+        type: "OAUTH_PROVIDER_ERROR",
+        message: `OAuth provider returned ${providerError}`,
+      } satisfies AppError;
+    }
+
     const code = normalizeCode(parsed.queryParams?.code);
   
     if (!code) {
       console.log(`Error in handleOAuthCallback : No OAuth code found`);
-      throw { type: "OAUTH_NO_CODE", message: "No OAuth code found"} satisfies AppError;
+      throw {
+        type: "OAUTH_NO_CODE",
+        message: "No OAuth code found",
+      } satisfies AppError;
     }
   
     return await fetchOAuthTokens(code);
