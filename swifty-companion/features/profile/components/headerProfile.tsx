@@ -1,5 +1,7 @@
+import { useContext } from "react";
 import { Image, Text, View, StyleSheet } from "react-native";
 import DEFAULT_IMAGE from"../../../assets/images/avatar-default.webp"
+import { AuthContext } from "@/contexts/AuthContext";
 import { useResponsive } from "@/hooks/useResponsive";
 import { useTheme } from "@/hooks/useTheme";
 import { HeaderProfileProps } from "../types/type";
@@ -7,8 +9,21 @@ import { HeaderProfileProps } from "../types/type";
 
 export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfileProps) {
     const theme = useTheme();
+    const auth = useContext(AuthContext);
+    const accessToken = auth?.authTokens?.accessToken;
     const { ms, hs, vs , isLandscape} = useResponsive();
-    const source = user?.image === "default" ? DEFAULT_IMAGE : {uri: user?.image}
+    // const source = user?.image === "default" ? DEFAULT_IMAGE : {uri: user?.image}
+    const source =
+    user?.image && user.image !== "default"
+        ? {
+            uri: user.image,
+            headers: accessToken
+                ? {
+                    Authorization: `Bearer ${accessToken}`,
+                }
+                : undefined,
+          }
+        : DEFAULT_IMAGE;
     console.log("source Avatar = ", source);
     
     const styles = StyleSheet.create({
@@ -57,7 +72,18 @@ export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfile
 
     return (
     <View style={styles.container}>
-        <Image source={source} style={styles.image}/>
+        {/* <Image source={source} style={styles.image}/> */}
+        <Image
+            source={source}
+            style={styles.image}
+            onLoad={(event) =>
+              console.log("[IMAGE LOAD]", JSON.stringify({
+                source,
+                dimensions: event.nativeEvent.source,
+              }))
+            }
+            onError={(event) => console.log("Erreur image :", event.nativeEvent)}
+        />
         <View style={styles.infoContainer}>
             <View style={styles.infoContainerLabel}>
                 <Text style={styles.Label}>Login</Text>

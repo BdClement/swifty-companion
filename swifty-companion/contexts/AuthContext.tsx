@@ -51,13 +51,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 if (url.startsWith("swiftycompanion://oauth")) {
 
                     await handleOAuthCallback(url);
+                    // Plus besoin puisque call API séparé ??
                     await new Promise(resolve => setTimeout(resolve, 800));
-                    router.replace("/profile");
+                    // router.replace("/profile");
+                    // console.log("Redirection vers /profile effectuée via AuthContext");
+                    router.replace("/connected");
+                    console.log("Redirection vers /connected effectuée via AuthContext");
                 }
                 setAuthError(null);
                 // Autres callbacks potentiels
             } catch (error) {
               router.replace("/login");
+              console.log("Redirection vers /login effectuée via AuthContext");
               console.log("OAuth callback error:", error);
               setAuthError(error as AppError);
             }

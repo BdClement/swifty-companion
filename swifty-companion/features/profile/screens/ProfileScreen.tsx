@@ -2,7 +2,6 @@ import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from "react";
 import { useAuth } from '@/hooks/useAuth';
-import { clearAuthTokens } from '@/utils/storageSecureStore';
 import { exteractUserProjects, extractLastActiveCursus, extractUser, getMe } from '../services/data';
 import { useTheme } from '@/hooks/useTheme';
 import { useResponsive } from '@/hooks/useResponsive';
