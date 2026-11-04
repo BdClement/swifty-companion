@@ -53,8 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     await handleOAuthCallback(url);
                     // Plus besoin puisque call API séparé ??
                     await new Promise(resolve => setTimeout(resolve, 800));
-                    // router.replace("/profile");
-                    // console.log("Redirection vers /profile effectuée via AuthContext");
                     router.replace("/connected");
                     console.log("Redirection vers /connected effectuée via AuthContext");
                 }
@@ -80,4 +78,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       </AuthContext.Provider>
     );
 }
-

@@ -1,23 +1,29 @@
 import { apiFetch } from "@/services/api";
-import { CursusUser, Me, ProjectUser, User } from "../types/type";
+import { CursusUser, FullIdentityResponse, ProjectUser, User } from "../types/type";
 
-export async function getMe(): Promise<Me> {
+const MAIN_CURSUS_ID = 21;
+
+export async function getMe(): Promise<FullIdentityResponse> {
     // Gestion d'erreur ?
-    return await apiFetch<Me>("/me");
+    return await apiFetch<FullIdentityResponse>("/me");
 }
 
-export function extractUser(me: Me): User {
+export async function getFullIdentityFromLogin(login: string) : Promise<FullIdentityResponse> {
+    return await apiFetch<FullIdentityResponse>(`/users/${encodeURIComponent(login)}`)
+}
+
+export function extractUser(full_identity: FullIdentityResponse): User {
   
     return {
-      id: me.id,
-      email: me.email,
-      login: me.login,
-      phone: me.phone ?? undefined,
-      image: me.image?.versions?.small ?? "default",
-      correction_point: me.correction_point,
-      pool_month: me.pool_month,
-      pool_year: me.pool_year,
-      location: me.location ?? undefined,
+      id: full_identity.id,
+      email: full_identity.email,
+      login: full_identity.login,
+      phone: full_identity.phone ?? undefined,
+      image: full_identity.image?.versions?.small ?? "default",
+      correction_point: full_identity.correction_point,
+      pool_month: full_identity.pool_month ?? null,
+      pool_year: full_identity.pool_year ?? null,
+      location: full_identity.location ?? undefined,
     };
 }
 
@@ -38,19 +44,23 @@ function extractCursusUser(cursus: CursusUser): CursusUser {
 }
 
 
-export function extractLastActiveCursus(me: Me): CursusUser | null {
+export function extractCursus(full_identity: FullIdentityResponse): CursusUser | null {
     // Si aucun cursus return null
-    if (me.cursus_users.length === 0) return null;
+    if (full_identity.cursus_users.length === 0) return null;
 
-    const active = me.cursus_users.filter(c => c.end_at === null);
+    const active = full_identity.cursus_users.filter(c => c.end_at === null);
     if (active.length > 1) console.warn("Multiple active cursus detected", active);
-    // A priori un seul actif a la fois mais on fallaback pour en choisir un 
     if (active.length > 0) {
-        const cursus: CursusUser = active[0];
+        const cursus: CursusUser = active.find(c => c.cursus_id === MAIN_CURSUS_ID) ??
+            [...active].sort(
+                (a, b) =>
+                    new Date(b.begin_at).getTime() -
+                    new Date(a.begin_at).getTime()
+            )[0];
         return extractCursusUser(cursus);
     }
-    // Sinon on fallback sur le dernier en date
-    const cursus: CursusUser = [...me.cursus_users].sort(
+    // Sans cursus actif, utiliser le plus récent.
+    const cursus: CursusUser = [...full_identity.cursus_users].sort(
         (a, b) =>
             new Date(b.begin_at).getTime() -
             new Date(a.begin_at).getTime()
@@ -75,7 +85,7 @@ function exctractProject(project_user: ProjectUser): ProjectUser {
     }
 }
 
-export function exteractUserProjects(me: Me, cursus_id: number): ProjectUser[] {
+export function exteractUserProjects(me: FullIdentityResponse, cursus_id: number): ProjectUser[] {
     if (me.projects_users.length === 0) return [];
 
     // extraire les projets uniquement du cursus_id

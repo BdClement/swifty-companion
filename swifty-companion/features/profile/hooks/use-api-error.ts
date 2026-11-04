@@ -37,51 +37,51 @@ export function mapHttpError(status: number): AppError["type"] {
 export function getErrorMessage(error: AppError) {
     switch (error.type) {
       case "NETWORK":
-        return "Network error. Please check your network connection.";
+        return "Unable to connect. Check your internet connection and try again.";
       
       case "OAUTH_NO_CODE":
-        return "Error: The callback did not contain an authorization code. Try logging in again."
+        return "The sign-in response was incomplete. Please try signing in again.";
 
       case "OAUTH_ACCESS_DENIED":
-        return "Login was cancelled: authorization was denied."
+        return "Sign-in was cancelled.";
 
       case "OAUTH_PROVIDER_ERROR":
-        return "Authentication failed: the OAuth provider returned an error."
+        return "Sign-in failed. Please try again.";
   
       case "OAUTH_TOKENS_MISSING":
-        return "Error: No OAuth tokens"
+        return "Your session is unavailable. Please sign in again.";
 
-    case "HTTP_400":
-        return "Bad Request 400";
+      case "HTTP_400":
+        return "The request could not be completed. Check the information and try again (400).";
   
       case "HTTP_401":
-        return "Unauthorized 401";
+        return "Authentication failed. Please sign in again (401).";
           
       case "HTTP_403":
-        return "Forbidden 403"; 
+        return "You do not have permission to access this resource (403)."; 
             
       case "HTTP_404":
-        return "Ressource not found 404";
+        return "The requested resource could not be found (404).\nCheck the information and try again.";
           
       case "HTTP_409":
-        return "Conflict 409";
+        return "The request conflicts with the current state (409). Please refresh and try again.";
   
       case "HTTP_500":
-        return "Servor error 500";
+        return "The service is temporarily unavailable (500). Please wait a moment and try again.";
   
       case "HTTP_OTHER":
-          return "HTPP Error"
+        return "The request failed. Please try again. If the problem persists, contact support.";
   
       case "OAUTH_TOKEN_EXCHANGE_FAILED":
-        return "Error: Authentication failed. Please try again"
+        return "Sign-in could not be completed. Please try again.";
   
       case "OAUTH_INVALID_RESPONSE":
-        return "Error: Invalid server response"
+        return "The server returned an invalid response. Please try again later.";
   
       case "UNKNOWN":
-        return "Error: Unknown error. Please contact us."
+        return "An unexpected error occurred. Please try again. If the problem persists, contact support.";
   
       default:
-        return "Unexpected error occurred";
+        return "An unexpected error occurred. Please try again.";
     }
   }

@@ -8,10 +8,11 @@ type ProjectCardProps = {
 }
 
 function getColorFromProject(project: ProjectUser, theme: any) {
+    if (project["validated?"] === true) return "#2D9C17";
     if (project.status === "in_progress") return "#FFA21A";
-    if (project.status === "finished" && project["validated?"] === true) return "#2D9C17";
+    // if (project.status === "finished") return "#2D9C17";
     if (project.status === "finished" && project["validated?"] === false) return theme.colors.primary;
-    return theme.colors.primary;
+    return "#FFA21A";
 }
 
 function withOpacity(hex: string, opacity: number) {
@@ -20,7 +21,7 @@ function withOpacity(hex: string, opacity: number) {
 }
 
 function getRetryFormat(project: ProjectUser) {
-    if (project.status === "finished" && project.occurrence === 0) return "One shot 🔥"
+    if (project.status === "finished" && project.occurrence === 0 && project["validated?"] === true) return "One shot 🔥"
     return `${project.occurrence} ${project.occurrence <= 1 ? "Retry" : "Retries"}`
 }
 

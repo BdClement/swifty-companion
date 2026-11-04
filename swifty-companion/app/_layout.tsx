@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { ResponsiveProvider } from '@/contexts/ResponsiveContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ProfileProvider } from '@/contexts/ProfileContext';
 import AppGuard from '@/components/guards/AppGuard';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from '@expo-google-fonts/playwrite-us-modern/useFonts';
@@ -26,11 +27,13 @@ export default function RootLayout() {
   return (
     <ResponsiveProvider>
       <AuthProvider>
-        <ThemeProvider>
-          <AppGuard />
-          <Stack screenOptions={{ headerShown: false }} />
-          <StatusBar style="auto" />
-        </ThemeProvider>
+        <ProfileProvider>
+          <ThemeProvider>
+            <AppGuard />
+            <Stack screenOptions={{ headerShown: false }} />
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </ProfileProvider>
       </AuthProvider>
     </ResponsiveProvider>
   )

@@ -24,6 +24,9 @@ export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfile
                 : undefined,
           }
         : DEFAULT_IMAGE;
+    const pool = [user?.pool_month, user?.pool_year]
+        .filter((value): value is string => Boolean(value))
+        .join(" ");
     console.log("source Avatar = ", source);
     
     const styles = StyleSheet.create({
@@ -97,7 +100,7 @@ export default function HeaderProfile({ user, lastActiveCursus } : HeaderProfile
                 <Text style={styles.data}>{user?.email}</Text>
                 <Text style={styles.data}>{user?.correction_point}</Text>
                 <Text style={styles.data}>{lastActiveCursus?.level}</Text>
-                <Text style={styles.data}>{user?.pool_month} {user?.pool_year}</Text>
+                <Text style={styles.data}>{pool || "Not available"}</Text>
             </View>
         </View>
     </View>

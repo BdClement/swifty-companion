@@ -7,7 +7,7 @@ export default function Index() {
 
   return (
     <Redirect
-      href={isAuthenticated ? '/(protected)/profile' : '/(auth)/login'}
+      href={isAuthenticated ? '/(protected)/connected' : '/(auth)/login'}
     />
   );
 }

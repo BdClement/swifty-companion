@@ -6,9 +6,10 @@ import { CursusUser } from "../types/type";
 
 type SectionSkillsProps = {
     lastActiveCursus: CursusUser | null;
+    isProfileLoaded: boolean;
 }
 
-export default function SectionSkills({lastActiveCursus} : SectionSkillsProps) {
+export default function SectionSkills({lastActiveCursus, isProfileLoaded} : SectionSkillsProps) {
     const theme = useTheme();
     const { ms, hs, vs , isLandscape} = useResponsive();
 
@@ -27,6 +28,12 @@ export default function SectionSkills({lastActiveCursus} : SectionSkillsProps) {
             fontWeight: "bold",
             fontFamily: theme.typography.body.fontFamily,
             color: theme.colors.primary
+        },
+        emptyMessage: {
+            color: theme.colors.primary,
+            fontSize: isLandscape? ms(10) : ms(14),
+            textAlign: "center",
+            paddingVertical: ms(8),
         }
     });
 
@@ -35,9 +42,13 @@ export default function SectionSkills({lastActiveCursus} : SectionSkillsProps) {
             <View style={styles.header}>
                 <Text style={styles.title}>Skills</Text>
             </View>
-            {lastActiveCursus?.skills.map(skill => (
-                <SkillBar key={skill.id} skill={skill}/>
-            ))}
+            {lastActiveCursus?.skills.length ? (
+                lastActiveCursus.skills.map(skill => (
+                    <SkillBar key={skill.id} skill={skill}/>
+                ))
+            ) : isProfileLoaded ? (
+                <Text style={styles.emptyMessage}>No skills available for this user.</Text>
+            ) : null}
         </View>
     );
 }

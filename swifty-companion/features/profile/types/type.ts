@@ -38,7 +38,7 @@ export type CursusUser = {
     updated_at: string;
 }
 
-export type Me = {
+export type FullIdentityResponse = {
     id: number;
     email: string;
     login: string;
@@ -50,8 +50,8 @@ export type Me = {
         }
     };
     correction_point: number;
-    pool_month: string;
-    pool_year: string;
+    pool_month: string | null;
+    pool_year: string | null;
     location?: string;
 
     cursus_users: CursusUser[];
@@ -65,8 +65,8 @@ export type User = {
     phone?: string;
     image?: string;
     correction_point: number;
-    pool_month: string;
-    pool_year: string;
+    pool_month: string | null;
+    pool_year: string | null;
     location?: string;
 }
 

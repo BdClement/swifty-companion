@@ -27,6 +27,12 @@ export default function SectionProjects({userProjects} : SectionProjectsProps) {
             fontWeight: "bold",
             fontFamily: theme.typography.body.fontFamily,
             color: theme.colors.primary
+        },
+        emptyMessage: {
+            color: theme.colors.primary,
+            fontSize: isLandscape? ms(10) : ms(14),
+            textAlign: "center",
+            paddingVertical: ms(8),
         }
     });
 
@@ -35,14 +41,18 @@ export default function SectionProjects({userProjects} : SectionProjectsProps) {
             <View style={styles.header}>
                 <Text style={styles.title}>Projects</Text>
             </View>
-            <FlatList
-            data={userProjects}
-            keyExtractor={(item) => item.id.toString()}
-            scrollEnabled={false}// Déja un ScrollView parent
-            renderItem={({ item }) => (
-                <ProjectCard project={item}/>
-            )}
-            />
+            {userProjects?.length ? (
+                <FlatList
+                    data={userProjects}
+                    keyExtractor={(item) => item.id.toString()}
+                    scrollEnabled={false}
+                    renderItem={({ item }) => (
+                        <ProjectCard project={item}/>
+                    )}
+                />
+            ) : userProjects !== null ? (
+                <Text style={styles.emptyMessage}>No projects available for this user.</Text>
+            ) : null}
         </View>
     )
 }
